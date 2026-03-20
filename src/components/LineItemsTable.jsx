@@ -28,7 +28,7 @@ export default function LineItemsTable({ items, onChange }) {
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {items.map((row, idx) => {
-          const isComped = ["included", "free", "complimentary"].includes((row.tag || "").toLowerCase());
+          const isComped = ["free", "complimentary"].includes((row.tag || "").toLowerCase());
           const amount   = isComped ? null : Number(row.qty || 1) * Number(row.unitPrice || 0);
 
           return (
