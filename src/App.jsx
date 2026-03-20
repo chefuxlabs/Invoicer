@@ -5,6 +5,7 @@ import InvoicePreview from "./components/InvoicePreview.jsx";
 import ChefUXLogo from "./components/ChefUXLogo.jsx";
 import { loadBizInfo, nextInvoiceNumber } from "./utils/storage.js";
 import { downloadInvoice } from "./utils/pdf.js";
+import { fetchRate } from "./utils/exchangeRate.js";
 
 function todayISO() {
   return new Date().toISOString().split("T")[0];
@@ -259,6 +260,7 @@ export default function App() {
   const [mobileTab, setMobileTab] = useState("edit");
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 860);
   const [previewOpen, setPreviewOpen] = useState(true);
+  const [liveRate, setLiveRate]   = useState({ rate: 1, loading: false, error: null, currency: "USD", updatedAt: null });
   const previewRef = useRef(null);
 
   useEffect(() => {
@@ -266,6 +268,22 @@ export default function App() {
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
+
+  // Fetch live exchange rate whenever currency changes
+  useEffect(() => {
+    if (invoice.currency === "USD") {
+      setLiveRate({ rate: 1, loading: false, error: null, currency: "USD", updatedAt: null });
+      return;
+    }
+    setLiveRate((r) => ({ ...r, loading: true, error: null }));
+    fetchRate(invoice.currency)
+      .then(({ rate, updatedAt }) =>
+        setLiveRate({ rate, loading: false, error: null, currency: invoice.currency, updatedAt })
+      )
+      .catch(() =>
+        setLiveRate((r) => ({ ...r, loading: false, error: "Rate unavailable" }))
+      );
+  }, [invoice.currency]);
 
   const handleDownload = async () => {
     setLoading(true);
@@ -359,7 +377,7 @@ export default function App() {
             background: C.cardBg,
             transition: "width 0.25s ease",
           }}>
-            <InvoiceForm invoice={invoice} onChange={setInvoice} />
+            <InvoiceForm invoice={invoice} onChange={setInvoice} liveRate={liveRate} />
           </div>
 
           {/* Right — Preview panel (collapsible) */}
@@ -384,7 +402,7 @@ export default function App() {
               boxShadow: C.shadow,
             }}>
               <PreviewScaler>
-                <InvoicePreview ref={previewRef} invoice={invoice} />
+                <InvoicePreview ref={previewRef} invoice={invoice} liveRate={liveRate} />
               </PreviewScaler>
             </div>
 
@@ -396,13 +414,13 @@ export default function App() {
         <div style={{ flex: 1, overflowY: "auto", paddingBottom: 68 }}>
           {mobileTab === "edit" ? (
             <div style={{ background: C.cardBg, minHeight: "100%" }}>
-              <InvoiceForm invoice={invoice} onChange={setInvoice} />
+              <InvoiceForm invoice={invoice} onChange={setInvoice} liveRate={liveRate} />
             </div>
           ) : (
             <div style={{ padding: 12 }}>
               <div style={{ borderRadius: 12, border: `1px solid ${C.border}`, overflow: "hidden", boxShadow: C.shadow }}>
                 <PreviewScaler>
-                  <InvoicePreview ref={previewRef} invoice={invoice} />
+                  <InvoicePreview ref={previewRef} invoice={invoice} liveRate={liveRate} />
                 </PreviewScaler>
               </div>
             </div>

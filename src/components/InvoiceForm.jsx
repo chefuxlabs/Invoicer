@@ -179,7 +179,7 @@ function DashBtn({ onClick, label }) {
 const hasAny = (...vals) => vals.some((v) => v && String(v).trim() !== "" && String(v).trim() !== "—");
 
 /* ── Main Form ─────────────────────────────────────────────── */
-export default function InvoiceForm({ invoice, onChange }) {
+export default function InvoiceForm({ invoice, onChange, liveRate }) {
   const set    = (f) => (e) => onChange({ ...invoice, [f]: e.target.value });
   const setVal = (f) => (v) => onChange({ ...invoice, [f]: v });
 
@@ -220,7 +220,32 @@ export default function InvoiceForm({ invoice, onChange }) {
           <Input label="Due / Ready By" type="date" value={invoice.dueDate} onChange={set("dueDate")} />
         </R2>
         <Select label="Currency" value={invoice.currency} onChange={set("currency")}
-          options={[["USD","USD — US Dollar"],["EUR","EUR — Euro"],["GBP","GBP — British Pound"],["PLN","PLN — Polish Złoty"],["AUD","AUD — Australian Dollar"],["CAD","CAD — Canadian Dollar"]]} />
+          options={[
+            ["USD","USD — US Dollar"],
+            ["LKR","LKR — Sri Lankan Rupee"],
+            ["EUR","EUR — Euro"],
+            ["GBP","GBP — British Pound"],
+            ["PLN","PLN — Polish Złoty"],
+            ["AUD","AUD — Australian Dollar"],
+            ["CAD","CAD — Canadian Dollar"],
+          ]} />
+        {/* Live exchange rate badge */}
+        {invoice.currency !== "USD" && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 11, color: C.muted }}>
+            {liveRate?.loading ? (
+              <span style={{ opacity: 0.6 }}>Fetching rate…</span>
+            ) : liveRate?.error ? (
+              <span style={{ color: "rgba(220,80,80,0.85)" }}>⚠ {liveRate.error}</span>
+            ) : liveRate?.rate ? (
+              <>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3DAA6D", flexShrink: 0, display: "inline-block" }} />
+                <span>1 USD = {liveRate.rate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} {invoice.currency}</span>
+                <span style={{ opacity: 0.45 }}>· live</span>
+                {liveRate.updatedAt && <span style={{ opacity: 0.35 }}>({liveRate.updatedAt})</span>}
+              </>
+            ) : null}
+          </div>
+        )}
       </Section>
 
       {/* ── Your Business ─────────────────────────────────────── */}
@@ -293,7 +318,7 @@ export default function InvoiceForm({ invoice, onChange }) {
       {/* ── Line Items ────────────────────────────────────────── */}
       <Section id="items" title="Line Items" open={open.items} onToggle={toggle}
         filled={invoice.items.some((r) => hasAny(r.name))}>
-        <LineItemsTable items={invoice.items} onChange={setVal("items")} />
+        <LineItemsTable items={invoice.items} onChange={setVal("items")} currency={invoice.currency} />
         <div style={{ marginTop: 14 }}>
           <Field label="Tax Rate (%)">
             <div style={{ position: "relative", maxWidth: 120 }}>

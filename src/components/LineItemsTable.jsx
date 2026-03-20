@@ -18,7 +18,12 @@ const TAGS = ["", "included", "free", "complimentary", "optional"];
 
 const fmt = (n) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-export default function LineItemsTable({ items, onChange }) {
+const currencySymbol = (currency) => {
+  const map = { EUR: "€", GBP: "£", PLN: "zł ", LKR: "Rs ", AUD: "$", CAD: "$" };
+  return map[currency] ?? "$";
+};
+
+export default function LineItemsTable({ items, onChange, currency = "USD" }) {
   const update = (id, field, val) =>
     onChange(items.map((r) => r.id === id ? { ...r, [field]: val } : r));
   const remove = (id) => onChange(items.filter((r) => r.id !== id));
@@ -108,7 +113,7 @@ export default function LineItemsTable({ items, onChange }) {
                     fontWeight: 700, fontSize: 13,
                     color: isComped ? C.green : C.text,
                   }}>
-                    {isComped ? "—" : `$${fmt(amount)}`}
+                    {isComped ? "—" : `${currencySymbol(currency)}${fmt(amount)}`}
                   </div>
                 </div>
                 <button onClick={() => remove(row.id)} title="Remove" style={{

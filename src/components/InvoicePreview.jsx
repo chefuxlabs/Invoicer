@@ -4,9 +4,12 @@ import ChefUXLogo from "./ChefUXLogo.jsx";
 
 const fmt = (n, currency = "USD") => {
   const num = Number(n || 0);
-  const sym = currency === "PLN" ? "zł" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
   const formatted = num.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  return currency === "PLN" ? `${formatted} ${sym}` : `${sym}${formatted}`;
+  if (currency === "EUR") return `€${formatted}`;
+  if (currency === "GBP") return `£${formatted}`;
+  if (currency === "PLN") return `${formatted} zł`;
+  if (currency === "LKR") return `Rs ${formatted}`;
+  return `$${formatted}`; // USD, AUD, CAD, default
 };
 
 const fmtDate = (iso) => {
@@ -65,7 +68,7 @@ function MetaLabel({ children }) {
   );
 }
 
-const InvoicePreview = forwardRef(function InvoicePreview({ invoice }, ref) {
+const InvoicePreview = forwardRef(function InvoicePreview({ invoice, liveRate }, ref) {
   const {
     docType = "INVOICE",
     refNumber = "INV-0001",
@@ -314,6 +317,19 @@ const InvoicePreview = forwardRef(function InvoicePreview({ invoice }, ref) {
               <span style={{ fontSize: 11, fontWeight: 700, color: C.white }}>Total</span>
               <span style={{ fontWeight: 800, fontSize: 18, color: C.coral, minWidth: 90, textAlign: "right" }}>{fmt(total, currency)}</span>
             </div>
+            {/* Live rate reference footnote */}
+            {currency !== "USD" && liveRate?.rate && !liveRate?.loading && (
+              <div style={{
+                marginTop: 10, paddingTop: 8, borderTop: `1px solid ${C.faint}`,
+                display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 5,
+              }}>
+                <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#3DAA6D", flexShrink: 0 }} />
+                <span style={{ fontSize: 9, color: C.muted }}>
+                  Ref rate: 1 USD = {liveRate.rate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} {currency}
+                  {liveRate.updatedAt ? ` · ${liveRate.updatedAt}` : ""}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
