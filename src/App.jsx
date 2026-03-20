@@ -50,197 +50,122 @@ function initInvoice() {
   };
 }
 
-const DOWNLOAD_BTN_CSS = `
-  .ui-anim-btn {
-    --highlight-hue: 26deg;
-    --highlight: hsl(var(--highlight-hue), 70%, 62%);
-    --highlight-80: hsla(var(--highlight-hue), 70%, 62%, 0.8);
-    --highlight-50: hsla(var(--highlight-hue), 70%, 62%, 0.5);
-    --highlight-30: hsla(var(--highlight-hue), 70%, 62%, 0.3);
-    --highlight-20: hsla(var(--highlight-hue), 70%, 62%, 0.2);
-    --padding: 4px;
-    --radius: 12px;
-    --transition: 0.4s;
+const SHINY_BTN_CSS = `
+  .shiny-btn {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     width: 100%;
-    padding: 13px 24px;
-    border-radius: var(--radius);
-    border: 1px solid rgba(196,130,90,0.25);
-    background: #18182A;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(325deg, #0c0e28 0%, #2a3a9e 45%, #4B6BDC 55%, #0c0e28 90%);
+    background-size: 280% auto;
+    background-position: left center;
     color: #fff;
     font-family: DM Sans, sans-serif;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     cursor: pointer;
     box-shadow:
-      inset 0px 1px 1px rgba(255,255,255,0.15),
-      inset 0px 4px 8px rgba(255,255,255,0.06),
-      0 4px 20px rgba(196,130,90,0.2);
-    transition: box-shadow var(--transition), border-color var(--transition), background-color var(--transition);
+      0px 0px 18px rgba(75,107,220,0.30),
+      0px 5px 5px -1px rgba(75,107,220,0.18),
+      inset 4px 4px 8px rgba(160,185,255,0.18),
+      inset -4px -4px 8px rgba(12,14,40,0.45);
+    transition: background-position 700ms ease, box-shadow 300ms ease, opacity 200ms ease;
     overflow: hidden;
   }
-  .ui-anim-btn::before {
-    content: "";
-    position: absolute;
-    top: calc(0px - var(--padding));
-    left: calc(0px - var(--padding));
-    width: calc(100% + var(--padding) * 2);
-    height: calc(100% + var(--padding) * 2);
-    border-radius: calc(var(--radius) + var(--padding));
-    pointer-events: none;
-    background-image: linear-gradient(0deg, #0004, #000a);
-    z-index: 0;
-    transition: box-shadow var(--transition);
+  .shiny-btn:hover {
+    background-position: right center;
     box-shadow:
-      0 -8px 8px -6px #0000 inset,
-      1px 1px 1px #fff2,
-      -1px -1px 1px #0002;
+      0px 0px 26px rgba(75,107,220,0.45),
+      0px 5px 8px -1px rgba(75,107,220,0.28),
+      inset 4px 4px 8px rgba(175,200,255,0.28),
+      inset -4px -4px 8px rgba(12,14,40,0.5);
   }
-  .ui-anim-btn::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background-image: linear-gradient(0deg, var(--highlight), var(--highlight-50) 30%, transparent);
-    opacity: 0;
-    transition: opacity var(--transition);
-    z-index: 0;
-    -webkit-mask-image: linear-gradient(0deg, #fff, transparent);
-    mask-image: linear-gradient(0deg, #fff, transparent);
-  }
-  .ui-anim-btn:hover {
-    border-color: hsla(26deg, 70%, 62%, 0.5);
-  }
-  .ui-anim-btn:hover::before {
+  .shiny-btn:active {
+    background-position: right center;
     box-shadow:
-      0 -8px 10px -6px #fff9 inset,
-      0 -16px 16px -8px var(--highlight-30) inset,
-      1px 1px 1px #fff2,
-      -1px -1px 1px #0002;
+      0px 0px 12px rgba(75,107,220,0.35),
+      inset 2px 2px 6px rgba(140,165,255,0.15),
+      inset -2px -2px 6px rgba(8,10,32,0.5);
   }
-  .ui-anim-btn:hover::after { opacity: 1; }
-  .ui-anim-btn:hover .ui-anim-btn-svg {
-    fill: #fff;
-    filter: drop-shadow(0 0 4px var(--highlight)) drop-shadow(0 -4px 6px #0009);
-    animation: none;
+  .shiny-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background-position: left center;
   }
-  .ui-anim-btn:active {
-    border-color: hsla(26deg, 70%, 62%, 0.8);
-    background-color: hsla(26deg, 40%, 18%, 0.6);
-  }
-  .ui-anim-btn:active::after { opacity: 1; filter: brightness(180%); }
-  .ui-anim-btn:active .ui-anim-letter {
-    text-shadow: 0 0 2px hsla(26deg,100%,85%,0.9);
-    animation: none;
-  }
-  .ui-anim-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-
-  .ui-anim-btn-svg {
-    fill: rgba(255,220,190,0.85);
+  .shiny-btn-icon {
     flex-shrink: 0;
-    margin-right: 8px;
-    position: relative;
-    z-index: 1;
-    filter: drop-shadow(0 0 2px rgba(255,200,150,0.6));
-    animation: ui-flicker 2s linear infinite;
-    animation-delay: 0.5s;
-    transition: fill 0.4s, filter 0.4s;
+    fill: rgba(200,215,255,0.9);
+    filter: drop-shadow(0 0 3px rgba(140,165,255,0.5));
+    transition: fill 0.3s, filter 0.3s;
   }
-  @keyframes ui-flicker {
-    50% { opacity: 0.35; }
+  .shiny-btn:hover .shiny-btn-icon {
+    fill: #fff;
+    filter: drop-shadow(0 0 5px rgba(150,180,255,0.7));
   }
-
-  .ui-anim-txt-wrapper {
+  .shiny-btn-label {
     position: relative;
     display: inline-flex;
     align-items: center;
-    min-width: 7.5em;
+    white-space: nowrap;
+    min-width: 7.8em;
     height: 1.2em;
-    z-index: 1;
   }
-  .ui-anim-txt-1, .ui-anim-txt-2 {
+  .shiny-lbl-idle,
+  .shiny-lbl-busy {
     position: absolute;
     left: 0;
     white-space: nowrap;
     display: flex;
-    transition: opacity 0.3s ease;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.25s ease, transform 0.25s ease;
   }
-  .ui-anim-txt-1 { opacity: 1; }
-  .ui-anim-txt-2 { opacity: 0; }
-  .ui-anim-btn.is-loading .ui-anim-txt-1 { opacity: 0; }
-  .ui-anim-btn.is-loading .ui-anim-txt-2 { opacity: 1; }
+  .shiny-lbl-idle  { opacity: 1;  transform: translateY(0); }
+  .shiny-lbl-busy  { opacity: 0;  transform: translateY(6px); }
+  .shiny-btn.is-loading .shiny-lbl-idle { opacity: 0; transform: translateY(-6px); }
+  .shiny-btn.is-loading .shiny-lbl-busy { opacity: 1; transform: translateY(0); }
 
-  .ui-anim-letter {
-    display: inline-block;
-    color: rgba(255,255,255,0.75);
-    animation: ui-letter-anim 2s ease-in-out infinite;
-    transition: color 0.4s, text-shadow 0.4s;
+  @keyframes shiny-spin {
+    to { transform: rotate(360deg); }
   }
-  @keyframes ui-letter-anim {
-    50% { text-shadow: 0 0 4px rgba(255,200,150,0.7); color: #fff; }
+  .shiny-spinner {
+    width: 13px; height: 13px;
+    border: 2px solid rgba(200,215,255,0.25);
+    border-top-color: rgba(200,215,255,0.9);
+    border-radius: 50%;
+    animation: shiny-spin 0.7s linear infinite;
+    flex-shrink: 0;
   }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(1)  { animation-delay: 0s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(2)  { animation-delay: 0.08s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(3)  { animation-delay: 0.16s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(4)  { animation-delay: 0.24s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(5)  { animation-delay: 0.32s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(6)  { animation-delay: 0.40s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(7)  { animation-delay: 0.48s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(8)  { animation-delay: 0.56s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(9)  { animation-delay: 0.64s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(10) { animation-delay: 0.72s; }
-  .ui-anim-txt-1 .ui-anim-letter:nth-child(11) { animation-delay: 0.80s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(1)  { animation-delay: 0s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(2)  { animation-delay: 0.08s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(3)  { animation-delay: 0.16s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(4)  { animation-delay: 0.24s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(5)  { animation-delay: 0.32s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(6)  { animation-delay: 0.40s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(7)  { animation-delay: 0.48s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(8)  { animation-delay: 0.56s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(9)  { animation-delay: 0.64s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(10) { animation-delay: 0.72s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(11) { animation-delay: 0.80s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(12) { animation-delay: 0.88s; }
-  .ui-anim-txt-2 .ui-anim-letter:nth-child(13) { animation-delay: 0.96s; }
 `;
 
 function DownloadButton({ onClick, loading }) {
   return (
     <>
-      <style>{DOWNLOAD_BTN_CSS}</style>
+      <style>{SHINY_BTN_CSS}</style>
       <button
         onClick={onClick}
         disabled={loading}
-        className={`ui-anim-btn${loading ? " is-loading" : ""}`}
+        className={`shiny-btn${loading ? " is-loading" : ""}`}
         aria-label={loading ? "Generating PDF…" : "Download PDF"}
       >
-        {/* Sparkle / download icon */}
-        {loading ? (
-          <svg className="ui-anim-btn-svg" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z"/>
-          </svg>
-        ) : (
-          <svg className="ui-anim-btn-svg" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/>
-          </svg>
-        )}
-        {/* Label layers */}
-        <div className="ui-anim-txt-wrapper">
-          <div className="ui-anim-txt-1">
-            {"Download PDF".split("").map((ch, i) => (
-              <span key={i} className="ui-anim-letter">{ch === " " ? "\u00A0" : ch}</span>
-            ))}
-          </div>
-          <div className="ui-anim-txt-2">
-            {"Generating PDF…".split("").map((ch, i) => (
-              <span key={i} className="ui-anim-letter">{ch === " " ? "\u00A0" : ch}</span>
-            ))}
-          </div>
+        {/* Sparkle icon */}
+        <svg className="shiny-btn-icon" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/>
+        </svg>
+        {/* Label swap */}
+        <div className="shiny-btn-label">
+          <span className="shiny-lbl-idle">Download PDF</span>
+          <span className="shiny-lbl-busy">
+            <span className="shiny-spinner" />
+            Generating…
+          </span>
         </div>
       </button>
     </>
