@@ -50,66 +50,101 @@ function initInvoice() {
   };
 }
 
-const SHINY_BTN_CSS = `
-  .shiny-btn {
+const HBG_CSS = `
+  @property --hbg-a {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+  @keyframes hbg-rotate {
+    to { --hbg-a: 360deg; }
+  }
+  @keyframes hbg-ring-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Outer wrapper — the visible 1px "border" is the gradient showing through */
+  .hbg-wrap {
     position: relative;
+    border-radius: 50px;
+    padding: 1px;
+    overflow: hidden;
+    width: 100%;
+    background: #0B0B14;
+  }
+
+  /* Rotating conic-gradient layer */
+  .hbg-spin {
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(
+      from var(--hbg-a) at 50% 50%,
+      transparent        0deg,
+      rgba(200,215,255,0.06) 35deg,
+      rgba(255,255,255,0.55) 65deg,
+      rgba(75,107,220,0.60)  88deg,
+      rgba(200,215,255,0.06) 118deg,
+      transparent        175deg
+    );
+    animation: hbg-rotate 2.5s linear infinite;
+    filter: blur(1px);
+  }
+  .hbg-wrap.is-hovered .hbg-spin {
+    animation-play-state: paused;
+  }
+
+  /* Blue radial glow — fades in on hover */
+  .hbg-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(75% 181% at 50% 50%, rgba(75,107,220,0.60) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .hbg-wrap.is-hovered .hbg-glow { opacity: 1; }
+
+  /* Inner button — dark bg fills, leaving just the 1px gradient "border" */
+  .hbg-btn {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     width: 100%;
-    height: 48px;
+    height: 46px;
     padding: 0 24px;
-    border-radius: 8px;
+    border-radius: 48px;
     border: none;
-    background: linear-gradient(325deg, #0c0e28 0%, #2a3a9e 45%, #4B6BDC 55%, #0c0e28 90%);
-    background-size: 280% auto;
-    background-position: left center;
+    background: #11111E;
     color: #fff;
     font-family: DM Sans, sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.02em;
     cursor: pointer;
-    box-shadow:
-      0px 0px 18px rgba(75,107,220,0.30),
-      0px 5px 5px -1px rgba(75,107,220,0.18),
-      inset 4px 4px 8px rgba(160,185,255,0.18),
-      inset -4px -4px 8px rgba(12,14,40,0.45);
-    transition: background-position 700ms ease, box-shadow 300ms ease, opacity 200ms ease;
-    overflow: hidden;
+    transition: background 0.2s ease;
   }
-  .shiny-btn:hover {
-    background-position: right center;
-    box-shadow:
-      0px 0px 26px rgba(75,107,220,0.45),
-      0px 5px 8px -1px rgba(75,107,220,0.28),
-      inset 4px 4px 8px rgba(175,200,255,0.28),
-      inset -4px -4px 8px rgba(12,14,40,0.5);
-  }
-  .shiny-btn:active {
-    background-position: right center;
-    box-shadow:
-      0px 0px 12px rgba(75,107,220,0.35),
-      inset 2px 2px 6px rgba(140,165,255,0.15),
-      inset -2px -2px 6px rgba(8,10,32,0.5);
-  }
-  .shiny-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    background-position: left center;
-  }
-  .shiny-btn-icon {
+  .hbg-wrap.is-hovered .hbg-btn { background: #13132e; }
+  .hbg-btn:active                { background: #0d0d22; }
+  .hbg-btn:disabled              { opacity: 0.45; cursor: not-allowed; }
+
+  /* Sparkle icon */
+  .hbg-icon {
     flex-shrink: 0;
-    fill: rgba(200,215,255,0.9);
-    filter: drop-shadow(0 0 3px rgba(140,165,255,0.5));
+    fill: rgba(200,215,255,0.85);
+    filter: drop-shadow(0 0 3px rgba(140,165,255,0.4));
     transition: fill 0.3s, filter 0.3s;
   }
-  .shiny-btn:hover .shiny-btn-icon {
+  .hbg-wrap.is-hovered .hbg-icon {
     fill: #fff;
-    filter: drop-shadow(0 0 5px rgba(150,180,255,0.7));
+    filter: drop-shadow(0 0 5px rgba(160,185,255,0.65));
   }
-  .shiny-btn-label {
+
+  /* Label swap — idle ↔ loading */
+  .hbg-label {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -117,57 +152,64 @@ const SHINY_BTN_CSS = `
     min-width: 7.8em;
     height: 1.2em;
   }
-  .shiny-lbl-idle,
-  .shiny-lbl-busy {
+  .hbg-lbl-idle,
+  .hbg-lbl-busy {
     position: absolute;
     left: 0;
     white-space: nowrap;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
-  .shiny-lbl-idle  { opacity: 1;  transform: translateY(0); }
-  .shiny-lbl-busy  { opacity: 0;  transform: translateY(6px); }
-  .shiny-btn.is-loading .shiny-lbl-idle { opacity: 0; transform: translateY(-6px); }
-  .shiny-btn.is-loading .shiny-lbl-busy { opacity: 1; transform: translateY(0); }
+  .hbg-lbl-idle { opacity: 1; transform: translateY(0); }
+  .hbg-lbl-busy { opacity: 0; transform: translateY(6px); }
+  .hbg-btn.is-loading .hbg-lbl-idle { opacity: 0; transform: translateY(-6px); }
+  .hbg-btn.is-loading .hbg-lbl-busy { opacity: 1; transform: translateY(0); }
 
-  @keyframes shiny-spin {
-    to { transform: rotate(360deg); }
-  }
-  .shiny-spinner {
+  /* Spinner ring */
+  .hbg-spinner {
     width: 13px; height: 13px;
-    border: 2px solid rgba(200,215,255,0.25);
+    border: 2px solid rgba(200,215,255,0.2);
     border-top-color: rgba(200,215,255,0.9);
     border-radius: 50%;
-    animation: shiny-spin 0.7s linear infinite;
+    animation: hbg-ring-spin 0.7s linear infinite;
     flex-shrink: 0;
   }
 `;
 
 function DownloadButton({ onClick, loading }) {
+  const [hovered, setHovered] = useState(false);
   return (
     <>
-      <style>{SHINY_BTN_CSS}</style>
-      <button
-        onClick={onClick}
-        disabled={loading}
-        className={`shiny-btn${loading ? " is-loading" : ""}`}
-        aria-label={loading ? "Generating PDF…" : "Download PDF"}
+      <style>{HBG_CSS}</style>
+      <div
+        className={`hbg-wrap${hovered ? " is-hovered" : ""}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        {/* Sparkle icon */}
-        <svg className="shiny-btn-icon" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/>
-        </svg>
-        {/* Label swap */}
-        <div className="shiny-btn-label">
-          <span className="shiny-lbl-idle">Download PDF</span>
-          <span className="shiny-lbl-busy">
-            <span className="shiny-spinner" />
-            Generating…
-          </span>
-        </div>
-      </button>
+        <div className="hbg-spin" />
+        <div className="hbg-glow" />
+        <button
+          onClick={onClick}
+          disabled={loading}
+          className={`hbg-btn${loading ? " is-loading" : ""}`}
+          aria-label={loading ? "Generating PDF…" : "Download PDF"}
+        >
+          {/* Sparkle icon */}
+          <svg className="hbg-icon" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/>
+          </svg>
+          {/* Label swap */}
+          <div className="hbg-label">
+            <span className="hbg-lbl-idle">Download PDF</span>
+            <span className="hbg-lbl-busy">
+              <span className="hbg-spinner" />
+              Generating…
+            </span>
+          </div>
+        </button>
+      </div>
     </>
   );
 }
