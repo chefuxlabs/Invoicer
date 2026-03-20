@@ -80,7 +80,7 @@ const InvoicePreview = forwardRef(function InvoicePreview({ invoice }, ref) {
   } = invoice;
 
   const subtotal = items.reduce((s, r) => {
-    if (r.tag && ["included", "free", "complimentary"].includes(r.tag.toLowerCase())) return s;
+    if (r.tag && ["free", "complimentary"].includes(r.tag.toLowerCase())) return s;
     return s + Number(r.qty || 1) * Number(r.unitPrice || 0);
   }, 0);
   const tax = subtotal * (Number(taxRate) / 100);
@@ -256,7 +256,7 @@ const InvoicePreview = forwardRef(function InvoicePreview({ invoice }, ref) {
 
               {/* Items */}
               {group.items.map((item, ii) => {
-                const isComped = item.tag && ["included", "free", "complimentary"].includes(item.tag.toLowerCase());
+                const isComped = item.tag && ["free", "complimentary"].includes(item.tag.toLowerCase());
                 const amount = isComped ? null : Number(item.qty || 1) * Number(item.unitPrice || 0);
                 return (
                   <div
